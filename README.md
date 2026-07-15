@@ -1,8 +1,8 @@
-# 💰 FinanceGuru
+# 💰 WealthWave
 
 > An AI-powered personal finance management platform built with Next.js 16.
 
-FinanceGuru helps you take control of your money through smart account management, AI receipt scanning, recurring transaction automation, budget alerts, and monthly financial reports powered by Google Gemini.
+WealthWave helps you take control of your money through smart account management, AI receipt scanning, recurring transaction automation, budget alerts, and monthly financial reports powered by Google Gemini.
 
 ---
 ## Deployed Link : https://ai-finance-platform2-inky.vercel.app/
