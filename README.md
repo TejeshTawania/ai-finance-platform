@@ -5,6 +5,7 @@
 FinanceGuru helps you take control of your money through smart account management, AI receipt scanning, recurring transaction automation, budget alerts, and monthly financial reports powered by Google Gemini.
 
 ---
+## Deployed Link : https://ai-finance-platform2-inky.vercel.app/
 
 ## ✨ Features
 
@@ -46,3 +47,5 @@ FinanceGuru helps you take control of your money through smart account managemen
 ---
 
 ## 📁 Project Structure
+
+
