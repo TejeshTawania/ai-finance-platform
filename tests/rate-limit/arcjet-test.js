@@ -20,9 +20,9 @@ const CONCURRENCY = 5; // parallel at a time
 async function fireRequest(index) {
   const start = Date.now();
   try {
-    const res = await fetch(`${BASE_URL}/`, {
+    const res = await fetch(`${BASE_URL}/api/test-arcjet`, {
       method: "GET",
-      headers: { "Content-Type": "text/html" },
+      headers: { "Content-Type": "application/json" },
     });
     const ms = Date.now() - start;
     return { index, status: res.status, ms, ok: res.ok };

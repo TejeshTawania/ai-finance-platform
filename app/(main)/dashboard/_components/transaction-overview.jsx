@@ -88,10 +88,8 @@ export function DashboardOverview({ accounts, transactions }) {
             value={selectedAccountId}
             onValueChange={setSelectedAccountId}
           >
-            <SelectTrigger className="w-[140px]">
-              <SelectValue placeholder="Select account">
-                {accounts.find((a) => a.id === selectedAccountId)?.name}
-              </SelectValue>
+            <SelectTrigger className="w-35">
+              <SelectValue placeholder="Select account" />
             </SelectTrigger>
             <SelectContent>
               {accounts.map((account) => (
@@ -136,7 +134,7 @@ export function DashboardOverview({ accounts, transactions }) {
                       ) : (
                         <ArrowUpRight className="mr-1 h-4 w-4" />
                       )}
-                      ${Number(transaction.amount).toFixed(2)}
+                      ${transaction.amount.toFixed(2)}
                     </div>
                   </div>
                 </div>

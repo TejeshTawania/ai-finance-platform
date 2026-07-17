@@ -2,7 +2,7 @@
 "use no memo";
 
 import { useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CalendarIcon, Loader2 } from "lucide-react";
 import { format } from "date-fns";
@@ -47,6 +47,7 @@ export function AddTransactionForm({
     handleSubmit,
     formState: { errors },
     watch,
+    control,
     setValue,
     getValues,
     reset,
@@ -120,13 +121,14 @@ export function AddTransactionForm({
       );
       reset();
       router.push(`/account/${transactionResult.data.accountId}`);
+      router.refresh();
     }
   }, [transactionResult, transactionLoading, editMode, reset, router]);
 
-  const type = watch("type");
-  const isRecurring = watch("isRecurring");
-  const date = watch("date");
-  const accountId = watch("accountId");
+  const type = useWatch({ control, name: "type" });
+  const isRecurring = useWatch({ control, name: "isRecurring" });
+  const date = useWatch({ control, name: "date" });
+  const accountId = useWatch({ control, name: "accountId" });
   const selectedAccount = accounts.find((a) => a.id === accountId);
 
   const filteredCategories = categories.filter(
