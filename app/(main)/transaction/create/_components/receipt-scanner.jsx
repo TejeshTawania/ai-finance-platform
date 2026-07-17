@@ -14,6 +14,7 @@ export function ReceiptScanner({ onScanComplete }) {
     loading: scanReceiptLoading,
     fn: scanReceiptFn,
     data: scannedData,
+    setData,
   } = useFetch(scanReceipt);
 
   const handleReceiptScan = async (file) => {
@@ -21,16 +22,17 @@ export function ReceiptScanner({ onScanComplete }) {
       toast.error("File size should be less than 5MB");
       return;
     }
-
-    await scanReceiptFn(file);
+    const formData = new FormData();
+    formData.append("file", file);
+    await scanReceiptFn(formData);
   };
 
   useEffect(() => {
     if (scannedData && !scanReceiptLoading) {
       onScanComplete(scannedData);
-      toast.success("Receipt scanned successfully");
+      setData(null); // Clear the data so it doesn't keep triggering on form re-renders
     }
-  }, [scanReceiptLoading, scannedData, onScanComplete]);
+  }, [scanReceiptLoading, scannedData, onScanComplete, setData]);
 
   return (
     <div className="flex items-center gap-4">

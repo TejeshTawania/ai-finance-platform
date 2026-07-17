@@ -99,7 +99,9 @@ export function AddTransactionForm({
     if (scannedData) {
       setValue("amount", scannedData.amount.toString());
       setValue("date", new Date(scannedData.date));
-      if (scannedData.description) {
+      if (scannedData.merchantName) {
+        setValue("description", scannedData.description ? `${scannedData.merchantName} - ${scannedData.description}` : scannedData.merchantName);
+      } else if (scannedData.description) {
         setValue("description", scannedData.description);
       }
       if (scannedData.category) {
@@ -253,18 +255,20 @@ export function AddTransactionForm({
           <div className="space-y-1.5">
             <label className="text-sm font-medium">Date</label>
             <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className={cn(
-                    "w-full justify-start pl-3 text-left font-normal",
-                    !date && "text-muted-foreground",
-                  )}
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4 opacity-50" />
-                  {date ? format(date, "PPP") : <span>Pick a date</span>}
-                </Button>
-              </PopoverTrigger>
+              <PopoverTrigger
+                render={
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start pl-3 text-left font-normal",
+                      !date && "text-muted-foreground",
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4 opacity-50" />
+                    {date ? format(date, "PPP") : <span>Pick a date</span>}
+                  </Button>
+                }
+              />
               <PopoverContent className="w-auto p-0" align="start">
                 <Calendar
                   mode="single"

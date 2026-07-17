@@ -3,11 +3,11 @@
 import { auth } from "@clerk/nextjs/server";
 import { db } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import Groq from "groq-sdk";
 import aj from "@/lib/arcjet";
 import { request } from "@arcjet/next";
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
 const serializeAmount = (obj) => ({
   ...obj,
@@ -89,6 +89,18 @@ export async function createTransaction(data) {
 
       return newTransaction;
     });
+
+    // Trigger immediate budget alert check if it's an expense
+    if (data.type === "EXPENSE") {
+      const { inngest } = await import("@/lib/inngest/client");
+      await inngest.send({
+        name: "budget.alert",
+        data: {
+          accountId: data.accountId,
+          userId: user.id,
+        },
+      });
+    }
 
     revalidatePath("/dashboard");
     revalidatePath(`/account/${transaction.accountId}`);
@@ -221,17 +233,29 @@ export async function getUserTransactions(query = {}) {
       },
     });
 
-    return { success: true, data: transactions };
+    const serializedTransactions = transactions.map((t) => ({
+      ...t,
+      amount: t.amount.toNumber(),
+      account: t.account
+        ? {
+            ...t.account,
+            balance: t.account.balance.toNumber(),
+          }
+        : undefined,
+    }));
+
+    return { success: true, data: serializedTransactions };
   } catch (error) {
     throw new Error(error.message);
   }
 }
 
 // Scan Receipt
-export async function scanReceipt(file) {
+export async function scanReceipt(fileData) {
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
-
+    const file = fileData instanceof FormData ? fileData.get("file") : fileData;
+    if (!file || typeof file === "string") throw new Error("Invalid file");
+    
     // Convert File to ArrayBuffer
     const arrayBuffer = await file.arrayBuffer();
     // Convert ArrayBuffer to Base64
@@ -257,18 +281,26 @@ export async function scanReceipt(file) {
       If its not a recipt, return an empty object
     `;
 
-    const result = await model.generateContent([
-      {
-        inlineData: {
-          data: base64String,
-          mimeType: file.type,
+    const chatCompletion = await groq.chat.completions.create({
+      messages: [
+        {
+          role: "user",
+          content: [
+            { type: "text", text: prompt },
+            {
+              type: "image_url",
+              image_url: {
+                url: `data:${file.type};base64,${base64String}`,
+              },
+            },
+          ],
         },
-      },
-      prompt,
-    ]);
+      ],
+      model: "meta-llama/llama-4-scout-17b-16e-instruct",
+      temperature: 0.1,
+    });
 
-    const response = await result.response;
-    const text = response.text();
+    const text = chatCompletion.choices[0].message.content;
     const cleanedText = text.replace(/```(?:json)?\n?/g, "").trim();
 
     try {
@@ -282,7 +314,7 @@ export async function scanReceipt(file) {
       };
     } catch (parseError) {
       console.error("Error parsing JSON response:", parseError);
-      throw new Error("Invalid response format from Gemini");
+      throw new Error("Invalid response format from Groq");
     }
   } catch (error) {
     console.error("Error scanning receipt:", error);
