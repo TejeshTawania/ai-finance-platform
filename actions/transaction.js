@@ -7,7 +7,6 @@ import Groq from "groq-sdk";
 import aj from "@/lib/arcjet";
 import { request } from "@arcjet/next";
 
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
 const serializeAmount = (obj) => ({
   ...obj,
@@ -253,6 +252,7 @@ export async function getUserTransactions(query = {}) {
 // Scan Receipt
 export async function scanReceipt(fileData) {
   try {
+    const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
     const file = fileData instanceof FormData ? fileData.get("file") : fileData;
     if (!file || typeof file === "string") throw new Error("Invalid file");
     
